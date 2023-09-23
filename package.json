@@ -1,0 +1,24 @@
+{
+  "name": "scraper",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.6.3",
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@stricjs/router": "^4.2.2",
+    "@stricjs/utils": "^1.5.3",
+    "@types/figlet": "^1.5.6",
+    "@types/xml2js": "^0.4.12",
+    "figlet": "^1.6.0",
+    "prisma": "^5.3.1",
+    "xml2js": "^0.6.2"
+  }
+}

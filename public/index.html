@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script src="//unpkg.com/alpinejs" defer></script>
+
+  <script>
+    function parseSocketData (msg) {
+      if (typeof msg !== 'string') return null
+      const data = JSON.parse(msg)
+
+      return data
+    }
+
+    function formatSocketData(type, value = undefined) {
+      const data = JSON.stringify({
+        type,
+        value: value
+      })
+      return data
+    }
+
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('form', () => ({
+        socket: null,
+        scanStatus: false,
+        init() {
+          this.socket = new WebSocket('ws://localhost:3000/ws');
+
+          this.socket.addEventListener('open', (event) => {
+            this.socket.send(formatSocketData("status"))
+          });
+
+          this.socket.addEventListener('message', (event) => {
+            const data = parseSocketData(event.data)
+
+            if (data.type == "status") {
+              this.scanStatus = data.value
+            }
+            console.log(`Received message from server: ${data.value}`)
+          })
+        },
+        
+        async submit(e) {
+          e.preventDefault()
+
+          const { url } = Object.fromEntries(new FormData(e.target).entries())
+
+          this.socket.send(formatSocketData("scan", url))
+        }
+      }))
+    })
+  </script>
+</head>
+<body class="bg-gray-100">
+
+  <div class="w-full max-w-xl mx-auto mt-10 border rounded shadow p-8 bg-white">
+    <form x-data="form" @submit="submit">
+      <div class="mb-6">
+        <label for="url" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Url</label>
+        <input type="text" id="url" name="url" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="https://thanhnien.vn/" required value="https://thanhnien.vn">
+      </div>
+      <button :disabled="scanStatus" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">Scan</button>
+    </form>
+  </div>
+</body>
+</html>
