@@ -5,7 +5,6 @@ import { scanRouter } from "./scan"
 import { socketRouter } from "../routes/socket"
 
 const useRoutes = (app: Router) => {
-  console.log(import.meta.dir)
   app.plug(scanRouter)
   app.plug(socketRouter)
 

@@ -6,5 +6,3 @@ const app = new Router()
 useRoutes(app)
 
 export default app
-
-// app.listen()
