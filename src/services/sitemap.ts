@@ -2,7 +2,7 @@ import xml2js from "xml2js";
 
 export type SitemapItemType = {
   loc: string[],
-  lastmod?: string[]
+  lastmod: string[] | undefined
   priority?: number
   changefreq?: string
   'image:image': {

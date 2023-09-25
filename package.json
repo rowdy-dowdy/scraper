@@ -18,6 +18,7 @@
     "@types/figlet": "^1.5.6",
     "@types/xml2js": "^0.4.12",
     "figlet": "^1.6.0",
+    "jsdom": "^22.1.0",
     "p-queue": "^7.4.1",
     "prisma": "^5.3.1",
     "typescript": "^5.2.2",
