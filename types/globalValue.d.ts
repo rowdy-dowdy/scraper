@@ -1,3 +1,6 @@
+import { WSContext } from "@stricjs/router"
+import { ServerWebSocket } from "bun"
+
 export {}
 
 interface Person {
@@ -6,4 +9,8 @@ interface Person {
 
 declare global {
   var scanStatus: boolean
+  var clients: {
+    id: string,
+    ws: ServerWebSocket<WSContext<"/ws">>
+  }[]
 }

@@ -2,36 +2,45 @@ import { Group } from "@stricjs/router";
 import { qs } from "@stricjs/utils";
 import { formatSocketData, parseSocketData } from "../services/utils";
 import { getScanStatus, startScanInSocket, stopScanInSocket } from "../controllers/socketController";
+import { randomUUID } from "crypto";
 
 const getID = qs.searchKey('id');
 
 global.scanStatus = false
+global.clients = []
 
 const group = new Group()
   .ws('/ws', {
     open(ws) {
-      getScanStatus(ws)
-      ws.subscribe('all')
+      const id = randomUUID()
+      //@ts-ignore
+      ws.id = id
+      global.clients.push({ id, ws })
+      // ws.subscribe('all')
+
+      getScanStatus()
     },
     message: (ws, msg) => {
       const data = parseSocketData(msg)
 
       switch (data?.type) {
         case "scan":
-          startScanInSocket(ws, data.value)
+          startScanInSocket(data.value)
           break;
         case "stop":
-          stopScanInSocket(ws)
+          stopScanInSocket()
           break;
         case "status":
-          getScanStatus(ws)
+          getScanStatus()
           break;
       }
 
       // ws.send((++count).toString())
     },
     close(ws) {
-      ws.unsubscribe('all')
+      //@ts-ignore
+      global.clients = global.clients.filter(v => v.id != ws.id)
+      // ws.unsubscribe('all')
     }
   })
     
