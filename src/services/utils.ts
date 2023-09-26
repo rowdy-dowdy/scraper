@@ -15,3 +15,7 @@ export function formatSocketData(type: string, value?: any) {
   })
   return data
 }
+
+export const waiting = (time: number) => new Promise(res => setTimeout(() => {
+  res(1)
+}, time))

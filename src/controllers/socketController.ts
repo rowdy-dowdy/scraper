@@ -1,6 +1,8 @@
 import { SitemapType, parseSitemap } from "../services/sitemap.ts";
 import { formatSocketData } from "../services/utils.ts";
 import PQueue from "p-queue";
+import { JSDOM } from "jsdom";
+import db from "../config/db.ts";
 
 const queue = new PQueue({concurrency: 4})
 
@@ -28,6 +30,8 @@ export const startScanInSocket = async (
 export const stopScanInSocket = async () => {
   global.scanStatus = false
   global.clients.forEach(v => v.ws.send( formatSocketData("status", global.scanStatus) ))
+  
+  console.log('stop')
 }
 
 export const getScanStatus = async () => {
@@ -59,17 +63,41 @@ const recursiveSitemap = async (url: string) => {
       let lastmod = urls[i]?.lastmod?.length > 0 ? urls[i]?.lastmod[0] : undefined
 
       if ( new Date(lastmod).toDateString() == new Date().toDateString() && urls[i].loc[0] && urls[i]["image:image"] ) {
-
-        console.log(urls[i].loc[0])
-        await new Promise(res => setTimeout(() => {
-          res(1)
-        }, 1000))
-
         queue.add(async () => {
-          console.log('ok')
+          // const post = await getDataInUrl(urls[i].loc[0])
+          // global.clients.forEach(v => v.ws.send( formatSocketData("url", {
+          //   url: urls[i].loc[0],
+          //   time: new Date(lastmod),
+          //   status: post ? 'success' : 'error'
+          // }) ))
         })
-        // global.clients.forEach(v => v.ws.send( formatSocketData("url", urls[i]) ))
       }
     }
   }
+}
+
+const getDataInUrl = async (url: string) => {
+  const res = await fetch(url)
+
+  if (!res.ok) return
+
+  const body = await res.text()
+
+  const document = new JSDOM(body)
+
+  const title = document.window.document.head.title
+  const description = (document.window.document.head.querySelector('meta[name="description"]') as HTMLMetaElement)?.content
+  const image = (document.window.document.head.querySelector('meta[name="og:image"]') as HTMLMetaElement)?.content
+  const content = document.window.document.querySelector('.detail-cmain').innerHTML
+
+  const post = await db.post.create({
+    data: {
+      title,
+      description,
+      image,
+      body: content
+    }
+  }).catch(e => null)
+
+  return post
 }
